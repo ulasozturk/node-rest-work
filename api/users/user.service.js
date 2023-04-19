@@ -20,4 +20,7 @@ module.exports = {
   deleteById: (id, callback) => {
     pool.query("delete from user where id = ?", [id], callback);
   },
+  getByEmail: (email, callback) => {
+    pool.query("select * from user where email = ?", [email], callback);
+  },
 };

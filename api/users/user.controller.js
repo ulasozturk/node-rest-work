@@ -1,5 +1,6 @@
 const Service = require("./user.service");
-const { genSaltSync, hashSync } = require("bcrypt");
+const { genSaltSync, hashSync, compareSync } = require("bcrypt");
+const { sign } = require("jsonwebtoken");
 
 module.exports = {
   create: (req, res) => {
@@ -34,10 +35,10 @@ module.exports = {
       (error, results) => {
         if (error) {
           res.status(400).json({ success: 0, message: error.sqlMessage });
-        } else if (!results) {
-          res.status(200).json({ success: 1, data: results[0] });
-        } else {
+        } else if (!results[0]) {
           res.status(404).json({ success: 0, message: "Not found." });
+        } else {
+          res.status(200).json({ success: 1, data: results[0] });
         }
       },
       req.query.select && req.query.select.split(",")
@@ -48,7 +49,7 @@ module.exports = {
       if (error) {
         res.status(400).json({ success: 0, message: error.sqlMessage });
       } else if (!results.affectedRows) {
-        res.status(200).json({ success: 0, message: "Not found." });
+        res.status(404).json({ success: 0, message: "Not found." });
       } else {
         res.status(200).json({ success: 1, data: results });
       }
@@ -59,9 +60,39 @@ module.exports = {
       if (error) {
         res.status(400).json({ success: 0, message: error.sqlMessage });
       } else if (!results.affectedRows) {
-        res.status(200).json({ success: 0, message: "Not found." });
+        res.status(404).json({ success: 0, message: "Not found." });
       } else {
         res.status(200).json({ success: 1, data: results });
+      }
+    });
+  },
+  login: (req, res) => {
+    Service.getByEmail(req.body.email, (error, results) => {
+      if (error) {
+        res.status(400).json({ success: 0, message: error.sqlMessage });
+      } else if (!results[0]) {
+        res
+          .status(404)
+          .json({ success: 0, message: "Invalid email or password." });
+      } else {
+        const user = results[0];
+        const isEqual = compareSync(req.body.password, user.password);
+        if (isEqual) {
+          const jwt = sign(
+            { email: user.email, name: user.name },
+            process.env.TOKEN_SECRET,
+            {
+              expiresIn: "2h",
+            }
+          );
+          res
+            .status(200)
+            .json({ success: 1, message: "Login succesful", token: jwt });
+        } else {
+          res
+            .status(404)
+            .json({ success: 0, message: "Invalid email or password." });
+        }
       }
     });
   },
