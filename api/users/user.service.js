@@ -2,16 +2,23 @@ const pool = require("../../config/database");
 
 module.exports = {
   create: (data, callback) => {
-    pool.query(
-      `insert into user(name, gender, email, password, phone)
-                    values(?,?,?,?,?)`,
-      [data.name, data.gender, data.email, data.password, data.phone],
-      (error, results, fields) => {
-        if (error) {
-          callback(error);
-        }
-        return callback(null, results);
-      }
-    );
+    pool.query("insert into user set ?", data, callback);
+  },
+  getAll: (callback, select = ["id", "name", "email", "gender", "phone"]) => {
+    pool.query("select ?? from user", [select], callback);
+  },
+  getById: (
+    id,
+    callback,
+    select = ["id", "name", "email", "gender", "phone"]
+  ) => {
+    console.log(select);
+    pool.query("select ?? from user where id = ?", [select, id], callback);
+  },
+  updateById: (id, data, callback) => {
+    pool.query("update user set ? where id = ?", [data, id], callback);
+  },
+  deleteById: (id, callback) => {
+    pool.query("delete from user where id = ?", [id], callback);
   },
 };
