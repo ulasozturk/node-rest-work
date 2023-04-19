@@ -10,7 +10,7 @@ module.exports = {
   getById: (
     id,
     callback,
-    select = ["id", "name", "email", "gender", "phone"]
+    select = ["id", "name", "email", "gender", "phone", "photo"]
   ) => {
     pool.query("select ?? from user where id = ?", [select, id], callback);
   },

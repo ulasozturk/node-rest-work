@@ -5,6 +5,7 @@ const app = express();
 const userRouter = require("./api/users/user.router");
 const rfs = require("rotating-file-stream");
 const path = require("path");
+const multer = require("multer");
 
 app.use(express.json());
 app.use(
@@ -22,7 +23,18 @@ app.use(
   })
 );
 
+app.use("/images", express.static("upload/images"));
 app.use("/api/users", userRouter);
+
+app.use((error, req, res, next) => {
+  if (error instanceof multer.MulterError) {
+    return res.status(400).json({
+      success: 0,
+      message: error.message ? error.message : error.code,
+    });
+  }
+  next();
+});
 
 app.listen(process.env.APP_PORT, () => {
   console.log(`Server up and running on PORT: ${process.env.APP_PORT}`);

@@ -96,4 +96,19 @@ module.exports = {
       }
     });
   },
+  photoUpload: (req, res) => {
+    const photo = `${process.env.APP_HOST}:${process.env.APP_PORT}/images/profile/${req.file.filename}`;
+    Service.updateById(req.body.id, { photo }, (error, results) => {
+      if (error) {
+        res.status(400).json({ success: 0, message: error.sqlMessage });
+      } else if (!results.affectedRows) {
+        res.status(404).json({ success: 0, message: "Not found." });
+      } else {
+        res.status(200).json({
+          success: 1,
+          photo,
+        });
+      }
+    });
+  },
 };
