@@ -12,7 +12,6 @@ module.exports = {
     callback,
     select = ["id", "name", "email", "gender", "phone"]
   ) => {
-    console.log(select);
     pool.query("select ?? from user where id = ?", [select, id], callback);
   },
   updateById: (id, data, callback) => {

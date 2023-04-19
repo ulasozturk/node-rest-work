@@ -34,7 +34,7 @@ module.exports = {
       (error, results) => {
         if (error) {
           res.status(400).json({ success: 0, message: error.sqlMessage });
-        } else if (results[0]) {
+        } else if (!results) {
           res.status(200).json({ success: 1, data: results[0] });
         } else {
           res.status(404).json({ success: 0, message: "Not found." });
@@ -47,6 +47,8 @@ module.exports = {
     Service.updateById(req.params.id, req.body, (error, results) => {
       if (error) {
         res.status(400).json({ success: 0, message: error.sqlMessage });
+      } else if (!results.affectedRows) {
+        res.status(200).json({ success: 0, message: "Not found." });
       } else {
         res.status(200).json({ success: 1, data: results });
       }
@@ -56,6 +58,8 @@ module.exports = {
     Service.deleteById(req.params.id, (error, results) => {
       if (error) {
         res.status(400).json({ success: 0, message: error.sqlMessage });
+      } else if (!results.affectedRows) {
+        res.status(200).json({ success: 0, message: "Not found." });
       } else {
         res.status(200).json({ success: 1, data: results });
       }
